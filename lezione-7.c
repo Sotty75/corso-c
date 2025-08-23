@@ -1,122 +1,140 @@
 #include <stdio.h>
 
-void conta(int start, int end)
+
+
+// questa versione, a meno di ottimizzazioni del comiplatore,
+// creera per ogni chiamata della ricorsione un nuovo stack-frame.
+// la rinominiamo vanilla e ne creiamo una diversa che non fa questa costa 
+// ma usa invece il goto.
+void conta_ricorsiva(int start, int end)
 {
 	if (start > end) return;
 	printf("%d\n", start);
-	conta(start+1, end);
+	conta_ricorsiva(start+1, end);
 }
+
+// non cambia niente, e' equivaluente a una ricorsione perche rieseguo lo stesso 
+// pezzo di codice cambiando l'input
+//
+// - questa implementazione si chiama TAIL CALL OPTIMIZATION e si puo' fare quando la
+//   funzione ricorsiva e' una chiamata di coda.
+void conta_goto(int start, int end)
+{
+iterate:
+	if (start > end) return;
+	
+	printf("%d\n", start);
+	start++;
+	goto iterate;
+}
+
+
+
+// ovviamente benche il goto permetta di eseguire questo tipo di ottimizzazione in C,
+// in generale si utilizzano costrutti di piu' alto livello, come ad esempio il while ed i for.
+
+void conta_while(int start, int end)
+{
+	printf("Ciclo WHILE:\n");
+	int i = start;	
+
+	while (i < end)
+	{
+		printf("%d\n", i);
+		i++;
+	}
+}
+
+// Il ciclo for in realta' non e' altro che un While mascherato.
+
+void conta_for(int start, int end)
+{
+	printf("Ciclo FOR:\n");
+
+	int i = start;	
+
+	for (int i = start; i < end;++i)
+		printf("%d\n", i);
+}
+
+
+// piccola variante in cui non inizializzo il ciclo for ma ne esco con un break
+void conta_for_break(int start, int end)
+{
+	printf("Ciclo FOR:\n");
+
+	int i = start;	
+
+	for (; ; ++i) {
+		if (i >=10) break; // in pratica ho un ciclo infinito dal quale esco con un break.
+		printf("%d\n", i);
+	}
+		
+
+	for (;;)  // >>>>> Ciclo Infinito!!
+	{
+		if (i >=10) break; // in pratica ho un ciclo infinito dal quale esco con un break.
+		printf("%d\n", i);
+		i++;
+	}
+
+	while (1)  // >>>>> Ciclo Infinito!! E' del tutto equivalente!!!
+	{
+		if (i >=10) break; // in pratica ho un ciclo infinito dal quale esco con un break.
+		printf("%d\n", i);
+		i++;
+	}
+}
+
 
 int main(void)
 {
-	int parte = 3;
+	// conta_while(0, 10);
+	// printd("Ciclo FOR:\n");
+	// conta_for(0, 10);
 
-	// Primo esempio
-	if (parte == 0)
-	{
+	// la condizione di uscita del for non deve necessariamente essere su i, ma puo' essere
+	// valutata su un valore dipendente da i, come ad esempio il valore di un elemento di 
+	// indice i
 
-		// cose da notare
-	//
-	// 1. blocchi tra parentesi graffe, non sono necessari in C nel caso sia una sola istruzione
-	// 2. E' piu' comodo porre in questo caso tutto nella stessa riga. cosi facendo si riduce anche la lunghezza del codice sorgente
-	//    e mi devo spostare meno per vedere il codice. E' una questione squisitamente stilistica
-	// 3. E' importante non focalizzarsi su questioni di stile, perche' ognuno ha il suo gusto estetico. Ovviamente ci vogliono dei limiti.
-	
-	int i = 5;
+	int a[] = {3, 4, 3, 8, 9, 0};
 
-	if (i > 3) 
+	int i;
+	for (i = 0; a[i] != 0; i++)
 	{
-		printf("i > 3\n");
-	}
-	else
-	{
-		printf("i <= 3\n");
+		printf("%d\n", a[i]);
 	}
 
-	// E' interessante il fatto che io possa mettere un blocco ovunque
-	{
-		// ...anche senza nessun motivo
-	}
-
-	// ma ancora piu' interessante e' che questo blocco in realta definisce una area 
-	// di esistenza delle variabili locali
-
-	{
-		int i = 4;
-		printf ("Questa i vale: %d\n", i);
-	}
-
-	printf ("Questa i vale: %d\n", i);
-
-
-	// proviamo ora ad accedere alla variabile i come se fosse un puntatore, in modo da verificare che siano
-	// effettivamente oggetti distinti in memoria
+	// do-while
+	// e' una alternativa con una semantica un po' diversa.
+	// viene fatta sempre una prima iterazione e il controllo sulla condizione
+	// viene fatta sempre alla fine. a volte e' utile ma in generale si puo' sostituire con 
+	// altri costrutti equivalenti basati wul while con ad esempio una if.
 	printf("\n");
-	printf("\n");
-
-	{
-		int i = 4;
-		printf ("La i locale e' registrata all'indirizzo: %p\n", &i);
-	}
-
-	printf ("La i globale e' registrata all'indirizzo: %p\n", &i);
-
-	}
-	
-	if (parte == 1) 
-	{
-		int i = 0;
-
-		// queste si chiamano etichette!! come in assembly o addiritttura in basic.
-		again:
-			printf("i equals: %d\n", i);
-			i++;
-			if (i < 10) goto again;
-				
-	}
-
-	//...sostituire un ciclo while con un if + goto
-	// lo scope mi sembra piu' pedagogico, nel senso che il risultato e' del codice che assomiblia molto 
-	// a come lo scriveremmo in linguaggio assembly, con delle etichette
-	// 
-	// in questo caso contiamo fino a 9 con un while, e poi lo implementiamo semplicemente
-	// sostituendo con un uso accorto di if e goto
-	// in realta' ha senso, pensando al fatto che il goto richiama una porzione di codice, che in questo caso 
-	// facciamo comunque. in realta' questo modo di lavorare, genera per ogni chiamata allocazioni in memoria creando un nuovo stack frame per
-	// ogni chiamata, che pero' e' poco efficiente in termine di ottimizzazione dell'utilizzo dello stackframe.
-	// quindi va fatto in modo accorto e se ha senso nella risoluzione di un problema. 
-	if (parte == 2)
-	{
-		int i = 0;   // inizializziamo il nostro contatore a 0
-
-		// while (i < 10)
-		// {
-		// 		printf("%d\n", i);
-		// 		i++;
-		// }
-
-	loop:
-		if (i < 10) goto next_iteration;
-		goto skip;
-
-		next_iteration:
-		printf("%d\n",i);
+	printf("Esercizio do-while\n");
+	i=0;
+	do {
 		i++;
-		goto loop;
-
-
-	skip:
-
-	}
-
-	// ora proviamo a fare il calcolo solo con delle if, usando la ricorsione
-	// non mi e' chiaro dove vuole arrivare ma ok.
-	// definiamo una funzone ricorsiva che chiamiamo conta() e la chiamiamo.
-	if (parte == 3)
-	{
-		conta(0, 9);
-	}
+		printf("%d\n", i);
+	} while (i < 10);
 	
+
+	// switch
+	// lo switch e' mnolto simile al caso di if >> else if >> else
+	// c'e' una differenza importante!!!
+	// - senza il break vengono eseguite le istruzioni associate al case e a tutti quelli successivi!!!
+	// - non si possono dichiarare variabili dentro il case, a meno che non metta esplicitamente le parentesi graffe del blocco.
+	printf("\n");
+	printf("Esercizio Switch:\n");
+	i = 5;
+
+	switch(i)
+	{
+		case 5: printf("E' un 5!\n"); break;
+		case 6: printf("E' un 6!\n"); break;
+		case 7: printf("E' un 7!\n"); break;
+		default: printf("Qualche altro numero!\n"); break;break;
+	}
 
 
 	return 0;
