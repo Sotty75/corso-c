@@ -20,6 +20,8 @@
     Si parla in questo caso di prefixed lenght string.
 
     Per introdurre ad esempio un byte definendolo in esadecimale si usa il carattere di escape \xNN
+    Questa modalita' di gestione delle stringhe era peculiare di linguaggi come il Pascal.
+
 */
 
 int main(void) 
